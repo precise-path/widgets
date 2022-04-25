@@ -1,0 +1,474 @@
+// timeUntilNextEvent.js
+
+// Get the F1 calendar on your device and display the next event in relative time
+
+const i = new Request("https://i.ibb.co/xX7QJ5K/f1-logo-widget.png");
+const logoLink = await i.loadImage();
+
+// Calendar name to grab events from. Find this in your calendar app.
+let calName = "F1 2022";
+// get the calendar
+let cal = await loadCalendar(calName);
+// format event data
+let event = await formatData(cal);
+// build widget
+let widget = await createWidget(event);
+// Check if the script is running in
+// a widget. If not, show a preview of
+// the widget to easier debug it.
+if (!config.runsInWidget) {
+  await widget.presentMedium();
+}
+// Tell the system to show the widget.
+Script.setWidget(widget);
+Script.complete();
+
+async function createWidget(alt) {
+  let gradient = new LinearGradient();
+  gradient.locations = [0, 1];
+  gradient.colors = [new Color("#1d1d23"), new Color("#141316")];
+
+  let w = new ListWidget();
+
+  // when widget is clicked it'll take us here in the default browser
+  w.url = "https://f1.com";
+
+  if (!alt) {
+    w.addSpacer();
+    let fallBackTitle = w.addText("No Upcoming Events");
+    fallBackTitle.font = Font.boldSystemFont(16);
+    fallBackTitle.textColor = Color.white();
+    w.addSpacer();
+
+    return w;
+  }
+  // Add spacer above content to center it vertically.
+
+  w.backgroundGradient = gradient;
+
+  let mainStack = w.addStack();
+  mainStack.layoutHorizontally();
+
+  let leftStack = mainStack.addStack();
+  leftStack.layoutVertically();
+
+  let rightStack = mainStack.addStack();
+  rightStack.layoutVertically();
+
+  let logo = rightStack.addImage(logoLink);
+  logo.imageSize = new Size(105, 18);
+
+  rightStack.addSpacer(36);
+
+  // Show headline.
+  let titleTxt = leftStack.addText(alt.title);
+  titleTxt.font = Font.heavySystemFont(17);
+  titleTxt.textColor = Color.white();
+
+  // Add spacing below.
+  leftStack.addSpacer(12);
+
+  // Create location if statement for Emoji flags and Circuit images.
+  if (alt.loc == "Sakhir") {
+    const tSakhir = new Request("https://i.ibb.co/RQTLXzP/t-Sakhir.png");
+    const tSakhirLink = await tSakhir.loadImage();
+
+    let Sakhir = rightStack.addImage(tSakhirLink);
+    Sakhir.imageSize = new Size(100, 60);
+    Sakhir.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇧🇭 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Jeddah") {
+    const tJeddah = new Request("https://i.ibb.co/vqyngWB/t-Jeddah.png");
+    const tJeddahLink = await tJeddah.loadImage();
+
+    let Jeddah = rightStack.addImage(tJeddahLink);
+    Jeddah.imageSize = new Size(100, 60);
+    Jeddah.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇸🇦 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Melbourne") {
+    const tMelbourne = new Request("https://i.ibb.co/V01KqLr/t-Melbourne.png");
+    const tMelbourneLink = await tMelbourne.loadImage();
+
+    let Melbourne = rightStack.addImage(tMelbourneLink);
+    Melbourne.imageSize = new Size(100, 60);
+    Melbourne.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇦🇺 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Imola") {
+    const tImola = new Request("https://i.ibb.co/TTB50DP/t-Imola.png");
+    const tImolaLink = await tImola.loadImage();
+
+    let Imola = rightStack.addImage(tImolaLink);
+    Imola.imageSize = new Size(110, 60);
+    Imola.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇮🇹 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Miami") {
+    const tMiami = new Request("https://i.ibb.co/qYX3YkF/t-Miami.png");
+    const tMiamiLink = await tMiami.loadImage();
+
+    let Miami = rightStack.addImage(tMiamiLink);
+    Miami.imageSize = new Size(100, 60);
+    Miami.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇺🇸 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Catalunya") {
+    const tSpain = new Request("https://i.ibb.co/ypmKz94/t-Spain.png");
+    const tSpainLink = await tSpain.loadImage();
+
+    let Spain = rightStack.addImage(tSpainLink);
+    Spain.imageSize = new Size(100, 60);
+    Spain.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇪🇸 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Monte Carlo") {
+    const tMonaco = new Request("https://i.ibb.co/xfM6xW2/t-Monaco.png");
+    const tMonacoLink = await tMonaco.loadImage();
+
+    let Monaco = rightStack.addImage(tMonacoLink);
+    Monaco.imageSize = new Size(100, 60);
+    Monaco.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇲🇨 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Baku") {
+    const tAzerbaijan = new Request(
+      "https://i.ibb.co/7pQFW47/t-Azerbaijan.png"
+    );
+    const tAzerbaijanLink = await tAzerbaijan.loadImage();
+
+    let Azerbaijan = rightStack.addImage(tAzerbaijanLink);
+    Azerbaijan.imageSize = new Size(100, 60);
+    Azerbaijan.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇦🇿 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Montreal") {
+    const tMontreal = new Request("https://i.ibb.co/LkQ1PBr/t-Montreal.png");
+    const tMontrealLink = await tMontreal.loadImage();
+
+    let Montreal = rightStack.addImage(tMontrealLink);
+    Montreal.imageSize = new Size(100, 60);
+    Montreal.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇨🇦 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Silverstone") {
+    const tSilverstone = new Request(
+      "https://i.ibb.co/Kz1FhFs/t-Silverstone.png"
+    );
+    const tSilverstoneLink = await tSilverstone.loadImage();
+
+    let Silverstone = rightStack.addImage(tSilverstoneLink);
+    Silverstone.imageSize = new Size(100, 60);
+    Silverstone.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇬🇧 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Spielberg") {
+    const tSpielberg = new Request("https://i.ibb.co/JFrffBN/t-Spielberg.png");
+    const tSpielbergLink = await tSpielberg.loadImage();
+
+    let Spielberg = rightStack.addImage(tSpielbergLink);
+    Spielberg.imageSize = new Size(100, 60);
+    Spielberg.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇦🇹 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Paul Ricard") {
+    const tPaulRicard = new Request(
+      "https://i.ibb.co/3hnbnm3/t-Paul-Ricard.png"
+    );
+    const tPaulRicardLink = await tPaulRicard.loadImage();
+
+    let PaulRicard = rightStack.addImage(tPaulRicardLink);
+    PaulRicard.imageSize = new Size(100, 60);
+    PaulRicard.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇫🇷 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Budapest") {
+    const tBudapest = new Request("https://i.ibb.co/p27GBMd/t-Budapest.png");
+    const tBudapestLink = await tBudapest.loadImage();
+
+    let Budapest = rightStack.addImage(tBudapestLink);
+    Budapest.imageSize = new Size(100, 60);
+    Budapest.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇭🇺 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Spa-Francorchamps") {
+    const tSpa = new Request("https://i.ibb.co/K2CP3YB/t-Spa.png");
+    const tSpaLink = await tSpa.loadImage();
+
+    let Spa = rightStack.addImage(tSpaLink);
+    Spa.imageSize = new Size(100, 60);
+    Spa.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇧🇪 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Zandvoort") {
+    const tZandvoort = new Request("https://i.ibb.co/S7JVVF4/t-Zandvoort.png");
+    const tZandvoortLink = await tZandvoort.loadImage();
+
+    let Zandvoort = rightStack.addImage(tZandvoortLink);
+    Zandvoort.imageSize = new Size(100, 60);
+    Zandvoort.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇳🇱 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Monza") {
+    const tMonza = new Request("https://i.ibb.co/QYRq5VH/t-Monza.png");
+    const tMonzaLink = await tMonza.loadImage();
+
+    let Monza = rightStack.addImage(tMonzaLink);
+    Monza.imageSize = new Size(100, 60);
+    Monza.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇮🇹 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Singapore") {
+    const tSingapore = new Request("https://i.ibb.co/BrW5PYJ/t-Singapore.png");
+    const tSingaporeLink = await tSingapore.loadImage();
+
+    let Singapore = rightStack.addImage(tSingaporeLink);
+    Singapore.imageSize = new Size(100, 60);
+    Singapore.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇸🇬 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Suzuka") {
+    const tSuzuka = new Request("https://i.ibb.co/Yd3y5Wt/t-Suzuka.png");
+    const tSuzukaLink = await tSuzuka.loadImage();
+
+    let Suzuka = rightStack.addImage(tSuzukaLink);
+    Suzuka.imageSize = new Size(100, 60);
+    Suzuka.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇯🇵 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Austin") {
+    const tAustin = new Request("https://i.ibb.co/DGWrMfx/t-Austin.png");
+    const tAustinLink = await tAustin.loadImage();
+
+    let Austin = rightStack.addImage(tAustinLink);
+    Austin.imageSize = new Size(100, 60);
+    Austin.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇺🇸 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Mexico City") {
+    const tMexicoCity = new Request(
+      "https://i.ibb.co/cQ9H6H4/t-Mexico-City.png"
+    );
+    const tMexicoCityLink = await tMexicoCity.loadImage();
+
+    let MexicoCity = rightStack.addImage(tMexicoCityLink);
+    MexicoCity.imageSize = new Size(100, 60);
+    MexicoCity.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇲🇽 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Sao Paulo") {
+    const tSaoPaulo = new Request("https://i.ibb.co/9YFP1j9/t-Sao-Paulo.png");
+    const tSaoPauloLink = await tSaoPaulo.loadImage();
+
+    let SaoPaulo = rightStack.addImage(tSaoPauloLink);
+    SaoPaulo.imageSize = new Size(100, 60);
+    SaoPaulo.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇧🇷 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else if (alt.loc == "Yas Marina") {
+    const tYasMarina = new Request("https://i.ibb.co/9Hhzg5z/t-Yas-Marina.png");
+    const tYasMarinaLink = await tYasMarina.loadImage();
+
+    let YasMarina = rightStack.addImage(tYasMarinaLink);
+    YasMarina.imageSize = new Size(100, 60);
+    YasMarina.rightAlignImage();
+
+    let subtitle = leftStack.addText("🇦🇪 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  } else {
+    let subtitle = leftStack.addText("📍 " + alt.loc);
+    subtitle.font = Font.boldSystemFont(15);
+    subtitle.textColor = Color.white();
+    subtitle.textOpacity = 0.9;
+  }
+
+  // Add spacing below
+  leftStack.addSpacer(10);
+
+  // show date time
+  let dateTxt2 = leftStack.addText(alt.startTime);
+  dateTxt2.font = Font.mediumSystemFont(12);
+  dateTxt2.textColor = Color.white();
+  dateTxt2.textOpacity = 0.6;
+  //   w.addSpacer(2)
+
+  // Show relative time
+  let dateTxt = leftStack.addText(alt.timeUntil);
+  dateTxt.font = Font.mediumSystemFont(12);
+  dateTxt.textColor = Color.white();
+  dateTxt.textOpacity = 0.6;
+  // Add spacing below content to center it vertically.
+  //   w.addSpacer()
+  return w;
+}
+
+async function loadCalendar(calName) {
+  // get calendar by name, every time I change it to be friendly it gets reset.
+  let cal = await Calendar.forEventsByTitle(calName);
+  let today = new Date(Date.now());
+  // 30 days from now. This will probably show wonky stuff once season is over
+  let nextMonth = today.valueOf() + 2592000000;
+  let events = await CalendarEvent.between(today, new Date(nextMonth), [cal]);
+
+  return events;
+}
+
+// take f1 calendar and get the most recent event and format it.
+// lots of dumb TimeZone stuff I'm pretty sure I got wrong, but close enough.
+async function formatData(events) {
+  let today = new Date(Date.now());
+
+  // time zone stuff that's not needed bc Calendar app handles this
+  let tzOffsetHour = today.getTimezoneOffset() / 60;
+
+  //     today.setHours(today.getHours() - tzOffsetHour)
+  let nextMonth = today.valueOf() + 2592000000;
+  const dtOpts = {
+    hour: "numeric",
+    dayPeriod: "short",
+    month: "short",
+    day: "numeric"
+  };
+  const fmt = new Intl.DateTimeFormat("en-US", dtOpts);
+  const rtf = new Intl.RelativeTimeFormat("en", { style: "long" });
+
+  // no events found. return nothing. should handle on display side
+  if (events && events.length === 0) {
+    return null;
+  }
+  const nextEvent = events[0];
+
+  let unit;
+  let timeVal;
+  const startTime = new Date(Date.parse(nextEvent.startDate));
+
+  // Timezone stuff that I think works but don't need
+  //     startTime
+  //     .setHours(startTime.getHours() - tzOffsetHour)
+
+  // time until the event starts in ms
+  const startTimeUntil = startTime.valueOf() - today.valueOf();
+
+  // figure out the unit to use the Intl formatter with
+  if (startTimeUntil > 86400000) {
+    timeVal = startTimeUntil / 1000 / 60 / 60 / 24;
+    unit = "day";
+  } else if (startTimeUntil > 3600000) {
+    timeVal = startTimeUntil / 1000 / 60 / 60;
+    unit = "hour";
+  } else {
+    timeVal = startTimeUntil / 1000 / 60;
+    unit = "minute";
+  }
+
+  // # debug life
+  console.log(
+    JSON.stringify(
+      {
+        today,
+        tzOffsetHour,
+        startTime,
+        startTimeUntil,
+        timeVal,
+        unit,
+        nextEvent
+      },
+      null,
+      2
+    )
+  );
+
+
+  let timeUntil = rtf.formatToParts(timeVal, unit);
+  // only get the text and whole numbers spaces come apart of the formatted value btw
+   let timeUntilFmt = timeUntil
+    .filter((t) => t.type === "literal" || t.type === "integer")
+  .map((t) => t.value)
+  .join("");
+
+  // # debug life
+  console.log(
+    JSON.stringify(
+      {
+        timeUntil,  
+        timeUntilFmt,
+        startTime
+      },
+      null,
+      2
+    )
+  );
+
+  return {
+    title: nextEvent.title,
+    loc: nextEvent.location,  
+    timeUntil: timeUntilFmt,
+    startTime: fmt.format(startTime)
+  };
+}
